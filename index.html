@@ -8,22 +8,6 @@
   </head>
   <body>
     <main class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Interactive product map</p>
-          <h1>Hospital HIS Explorer</h1>
-        </div>
-        <div class="top-actions">
-          <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle dark mode">
-            ◐
-          </button>
-          <nav class="tabs" aria-label="Product type">
-            <button class="tab active" type="button" data-product="hospital">Hospital</button>
-            <button class="tab" type="button" data-product="clinic">Clinic</button>
-          </nav>
-        </div>
-      </header>
-
       <section class="workspace">
         <div class="map-card">
           <div class="map-toolbar">
@@ -32,6 +16,10 @@
               <span>Click and drag a module to focus its direct flows.</span>
             </div>
             <div class="map-actions">
+              <nav class="tabs" aria-label="Product type">
+                <button class="tab active" type="button" data-product="hospital">Hospital</button>
+                <button class="tab" type="button" data-product="clinic">Clinic</button>
+              </nav>
               <button class="tool-btn primary icon-only" id="fullscreenBtn" type="button" aria-label="Full screen">
                 ⛶
               </button>

@@ -551,7 +551,6 @@ const fullscreenBtn = document.getElementById("fullscreenBtn");
 const mapCard = document.querySelector(".map-card");
 const mapStage = document.getElementById("mapStage");
 const mapContent = document.getElementById("mapContent");
-const themeBtn = document.getElementById("themeBtn");
 const connectionsSvg = document.querySelector(".connections");
 const mapTitle = document.getElementById("mapTitle");
 const tabButtons = document.querySelectorAll("[data-product]");
@@ -812,11 +811,6 @@ document.addEventListener("fullscreenchange", () => {
     "aria-label",
     document.fullscreenElement ? "Exit full screen" : "Full screen",
   );
-});
-
-themeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  themeBtn.textContent = document.body.classList.contains("dark") ? "☀" : "◐";
 });
 
 function applyZoom(nextZoom, originX, originY) {
