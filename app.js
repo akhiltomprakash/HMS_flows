@@ -20,7 +20,7 @@ const hospitalModules = [
     y: 40,
     w: 275,
     h: 185,
-    tone: "blue",
+    tone: "registration",
     module: true,
   },
   {
@@ -43,7 +43,7 @@ const hospitalModules = [
     y: 445,
     w: 275,
     h: 165,
-    tone: "red",
+    tone: "emergency",
     module: true,
   },
   {
@@ -67,7 +67,7 @@ const hospitalModules = [
     y: 880,
     w: 275,
     h: 175,
-    tone: "purple",
+    tone: "beds",
     module: true,
   },
   {
@@ -91,7 +91,7 @@ const hospitalModules = [
     y: 905,
     w: 275,
     h: 175,
-    tone: "purple",
+    tone: "nursing",
     module: true,
   },
   {
@@ -116,7 +116,7 @@ const hospitalModules = [
     y: 540,
     w: 330,
     h: 180,
-    tone: "purple",
+    tone: "ipd",
     module: true,
   },
   {
@@ -139,7 +139,7 @@ const hospitalModules = [
     y: 300,
     w: 330,
     h: 175,
-    tone: "green",
+    tone: "opd",
     module: true,
   },
   {
@@ -163,7 +163,7 @@ const hospitalModules = [
     y: 310,
     w: 350,
     h: 200,
-    tone: "red",
+    tone: "record",
     module: true,
   },
   {
@@ -187,7 +187,7 @@ const hospitalModules = [
     y: 65,
     w: 330,
     h: 180,
-    tone: "green",
+    tone: "clinical",
     module: true,
   },
   {
@@ -211,7 +211,7 @@ const hospitalModules = [
     y: 705,
     w: 315,
     h: 190,
-    tone: "yellow",
+    tone: "pharmacy",
     module: true,
   },
   {
@@ -235,7 +235,7 @@ const hospitalModules = [
     y: 35,
     w: 350,
     h: 190,
-    tone: "orange",
+    tone: "lab",
     module: true,
   },
   {
@@ -261,7 +261,7 @@ const hospitalModules = [
     y: 730,
     w: 290,
     h: 230,
-    tone: "gray",
+    tone: "discharge",
     module: true,
   },
   {
@@ -285,7 +285,7 @@ const hospitalModules = [
     y: 940,
     w: 315,
     h: 180,
-    tone: "blue",
+    tone: "insurance",
     module: true,
   },
   {
@@ -310,49 +310,56 @@ const hospitalModules = [
     y: 430,
     w: 350,
     h: 190,
-    tone: "gray",
+    tone: "billing",
     module: true,
   },
 ];
 
 const hospitalConnections = [
-  ["registration", "opd", "check-in + token", "identity", "critical"],
-  ["registration", "ipd", "patient identity", "identity", "critical"],
-  ["registration", "emergency", "quick/complete registration", "identity", "degraded"],
-  ["registration", "record", "patient identity", "record", "critical"],
-  ["emergency", "registration", "complete registration", "identity", "degraded"],
-  ["emergency", "ipd", "convert", "clinical", "critical"],
-  ["emergency", "clinical", "stabilization notes", "clinical", "critical"],
-  ["emergency", "record", "emergency notes", "record", "critical"],
-  ["opd", "ipd", "admit", "clinical", "critical"],
-  ["opd", "clinical", "consult", "clinical", "critical"],
-  ["ipd", "clinical", "rounds", "clinical", "critical"],
-  ["ipd", "nursing", "nurse", "clinical", "critical"],
-  ["beds", "ipd", "bed movement", "clinical", "critical"],
-  ["ipd", "beds", "bed request", "clinical", "critical"],
-  ["beds", "nursing", "ward context", "clinical", "degraded"],
-  ["nursing", "beds", "ward status", "clinical", "degraded"],
-  ["nursing", "record", "vitals + MAR", "record", "degraded"],
-  ["ipd", "record", "admission history", "record", "critical"],
-  ["opd", "record", "OPD history", "record", "critical"],
-  ["clinical", "record", "notes + orders", "record", "critical"],
-  ["clinical", "pharmacy", "prescription", "orders", "critical"],
-  ["clinical", "lab", "test orders", "orders", "critical"],
-  ["lab", "record", "results", "record", "degraded"],
-  ["lab", "billing", "lab charges", "finance", "degraded"],
-  ["pharmacy", "billing", "medicine charges", "finance", "degraded"],
-  ["pharmacy", "discharge", "discharge meds", "clinical", "degraded"],
-  ["lab", "discharge", "report summary", "clinical", "degraded"],
-  ["clinical", "discharge", "doctor approval", "clinical", "critical"],
-  ["nursing", "discharge", "care notes", "clinical", "degraded"],
-  ["ipd", "discharge", "discharge closure", "clinical", "critical"],
-  ["discharge", "record", "archive", "record", "critical"],
-  ["discharge", "billing", "final settlement", "finance", "critical"],
-  ["billing", "discharge", "settlement status", "finance", "critical"],
-  ["discharge", "insurance", "claim documents", "finance", "degraded"],
-  ["insurance", "discharge", "approval docs", "finance", "degraded"],
-  ["billing", "insurance", "claim ledger", "finance", "critical"],
-].map(([from, to, label, kind, severity]) => ({ from, to, label, kind, severity }));
+  ["registration", "opd", "check-in + token", "identity", "critical", "After registration, the patient gets an OPD token and can enter the outpatient queue."],
+  ["registration", "ipd", "patient identity", "identity", "critical", "If the patient is admitted, the same registration identity is used for the IPD stay."],
+  ["registration", "emergency", "quick/complete registration", "identity", "degraded", "Some patients register first and then go to emergency with the same patient identity."],
+  ["registration", "record", "patient identity", "record", "critical", "Registration creates the base patient identity that the central record uses everywhere else."],
+  ["emergency", "registration", "complete registration", "identity", "degraded", "In urgent cases, emergency care can start first and registration can be completed after the patient is stable."],
+  ["emergency", "ipd", "convert", "clinical", "critical", "If the emergency case needs admission, it can be converted into an IPD stay."],
+  ["emergency", "clinical", "stabilization notes", "clinical", "critical", "Emergency notes and stabilization details go to the doctor so treatment can continue with context."],
+  ["emergency", "record", "emergency notes", "record", "critical", "The emergency visit becomes part of the patient's central history."],
+  ["opd", "ipd", "admit", "clinical", "critical", "If an outpatient needs admission, the OPD visit can move into IPD."],
+  ["opd", "clinical", "consult", "clinical", "critical", "The OPD queue sends the patient to the doctor console for consultation."],
+  ["ipd", "clinical", "rounds", "clinical", "critical", "Admitted patients appear in the doctor console for rounds, notes, orders, and decisions."],
+  ["ipd", "nursing", "nurse", "clinical", "critical", "Once a patient is admitted, nursing teams record vitals, medicines, and ward care."],
+  ["beds", "ipd", "bed movement", "clinical", "critical", "Bed and ward changes update the active IPD stay."],
+  ["ipd", "beds", "bed request", "clinical", "critical", "IPD requests a bed or ward movement when the admitted patient needs placement."],
+  ["beds", "nursing", "ward context", "clinical", "degraded", "Nursing uses bed and ward information to know where the patient is and what ward context applies."],
+  ["nursing", "beds", "ward status", "clinical", "degraded", "Nursing updates can reflect ward status, movement readiness, or bed-related care state."],
+  ["nursing", "record", "vitals + MAR", "record", "degraded", "Vitals, medication administration, and nursing notes are saved into the patient record."],
+  ["ipd", "record", "admission history", "record", "critical", "The IPD stay adds admission, ward, treatment, and discharge history to the patient record."],
+  ["opd", "record", "OPD history", "record", "critical", "Each OPD visit is saved into the patient's central history."],
+  ["clinical", "record", "notes + orders", "record", "critical", "Doctor notes, diagnoses, orders, and prescriptions become part of the patient record."],
+  ["clinical", "pharmacy", "prescription", "orders", "critical", "When the doctor prescribes medicines, pharmacy receives them for dispensing."],
+  ["clinical", "lab", "test orders", "orders", "critical", "When the doctor orders tests, the lab receives the request."],
+  ["lab", "record", "results", "record", "degraded", "Approved lab results are saved back into the patient record."],
+  ["lab", "billing", "lab charges", "finance", "degraded", "Lab tests create charges that flow into billing."],
+  ["pharmacy", "billing", "medicine charges", "finance", "degraded", "Dispensed medicines create charges that flow into billing."],
+  ["pharmacy", "discharge", "discharge meds", "clinical", "degraded", "Medicines to continue after discharge are included in the discharge summary."],
+  ["lab", "discharge", "report summary", "clinical", "degraded", "Important lab reports can be summarized in the discharge summary."],
+  ["clinical", "discharge", "doctor approval", "clinical", "critical", "The doctor reviews and approves the clinical part of discharge."],
+  ["nursing", "discharge", "care notes", "clinical", "degraded", "Nursing notes help complete the care summary before discharge."],
+  ["ipd", "discharge", "discharge closure", "clinical", "critical", "The admitted stay closes through the discharge summary."],
+  ["discharge", "record", "archive", "record", "critical", "The final discharge summary is saved into the patient record."],
+  ["discharge", "billing", "final settlement", "finance", "critical", "Discharge checks billing so the final settlement can be completed."],
+  ["billing", "discharge", "settlement status", "finance", "critical", "Billing sends payment and settlement status back to discharge."],
+  ["discharge", "insurance", "claim documents", "finance", "degraded", "Discharge documents help prepare the insurance claim."],
+  ["insurance", "discharge", "approval docs", "finance", "degraded", "Insurance approvals or claim details come back into the discharge process."],
+  ["billing", "insurance", "claim ledger", "finance", "critical", "Billing provides the financial details needed for insurance claims and settlement."],
+].map(([from, to, label, kind, severity, explanation]) => ({
+  from,
+  to,
+  label,
+  kind,
+  severity,
+  explanation,
+}));
 
 const clinicModules = [
   {
@@ -369,7 +376,7 @@ const clinicModules = [
     y: 110,
     w: 360,
     h: 185,
-    tone: "blue",
+    tone: "clinic-hub",
     module: true,
   },
   {
@@ -386,7 +393,7 @@ const clinicModules = [
     y: 90,
     w: 380,
     h: 210,
-    tone: "green",
+    tone: "clinic-consult",
     module: true,
   },
   {
@@ -403,7 +410,7 @@ const clinicModules = [
     y: 95,
     w: 360,
     h: 200,
-    tone: "red",
+    tone: "clinic-prescription",
     module: true,
   },
   {
@@ -420,7 +427,7 @@ const clinicModules = [
     y: 80,
     w: 360,
     h: 205,
-    tone: "yellow",
+    tone: "clinic-inventory",
     module: true,
   },
   {
@@ -437,7 +444,7 @@ const clinicModules = [
     y: 520,
     w: 390,
     h: 210,
-    tone: "orange",
+    tone: "clinic-billing",
     module: true,
   },
   {
@@ -454,21 +461,28 @@ const clinicModules = [
     y: 365,
     w: 360,
     h: 190,
-    tone: "purple",
+    tone: "clinic-whatsapp",
     module: true,
   },
 ];
 
 const clinicConnections = [
-  ["clinic-patient-hub", "clinic-consultation", "open visit", "identity", "critical"],
-  ["clinic-consultation", "clinic-patient-hub", "visit history", "record", "critical"],
-  ["clinic-consultation", "clinic-prescriptions", "treatment plan", "clinical", "critical"],
-  ["clinic-prescriptions", "clinic-inventory", "stock deduction", "orders", "degraded"],
-  ["clinic-prescriptions", "clinic-billing", "medicine charges", "finance", "degraded"],
-  ["clinic-consultation", "clinic-billing", "consultation charge", "finance", "critical"],
-  ["clinic-billing", "clinic-patient-hub", "payment history", "record", "degraded"],
-  ["clinic-patient-hub", "clinic-whatsapp", "patient database view", "record", "critical"],
-].map(([from, to, label, kind, severity]) => ({ from, to, label, kind, severity }));
+  ["clinic-patient-hub", "clinic-consultation", "open visit", "identity", "critical", "The doctor opens a visit from the patient profile before starting the consultation."],
+  ["clinic-consultation", "clinic-patient-hub", "visit history", "record", "critical", "After the consultation, the visit notes return to the patient hub as history."],
+  ["clinic-consultation", "clinic-prescriptions", "treatment plan", "clinical", "critical", "The doctor's treatment plan becomes the prescription for that visit."],
+  ["clinic-prescriptions", "clinic-inventory", "stock deduction", "orders", "degraded", "If medicines are dispensed from the clinic, prescription items reduce stock."],
+  ["clinic-prescriptions", "clinic-billing", "medicine charges", "finance", "degraded", "Dispensed prescription medicines can be added to the bill."],
+  ["clinic-consultation", "clinic-billing", "consultation charge", "finance", "critical", "The consultation creates the basic visit charge for billing."],
+  ["clinic-billing", "clinic-patient-hub", "payment history", "record", "degraded", "Payments and receipts are saved back under the patient profile."],
+  ["clinic-patient-hub", "clinic-whatsapp", "patient database view", "record", "critical", "When a doctor needs remote access, the system sends the patient database view to WhatsApp."],
+].map(([from, to, label, kind, severity, explanation]) => ({
+  from,
+  to,
+  label,
+  kind,
+  severity,
+  explanation,
+}));
 
 const productMaps = {
   hospital: {
@@ -487,16 +501,38 @@ const productMaps = {
   },
 };
 
-const colors = {
-  identity: "#7abfff",
-  clinical: "#a78bfa",
-  orders: "#f8bd57",
-  finance: "#fb9a5f",
-  record: "#70d88d",
-  governance: "#62d4c9",
+const icons = {
+  registration: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v6h6"/><path d="M9 14h6"/><path d="M12 11v6"/>`,
+  emergency: `<path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z"/><path d="M12 7v5"/><path d="M12 16h.01"/>`,
+  beds: `<path d="M3 7v10"/><path d="M21 11v6"/><path d="M3 13h18"/><path d="M7 13V9h7a3 3 0 0 1 3 3v1"/>`,
+  nursing: `<path d="M12 21s-7-4.6-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.4-7 11-7 11z"/><path d="M12 8v6"/><path d="M9 11h6"/>`,
+  ipd: `<path d="M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16"/><path d="M9 21v-6h6v6"/><path d="M9 8h6"/><path d="M12 5v6"/>`,
+  opd: `<circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/><path d="M18 8h3"/><path d="M3 8h3"/>`,
+  record: `<path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/>`,
+  clinical: `<path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/>`,
+  pharmacy: `<path d="M10 21a5 5 0 0 1 0-7l4-4a5 5 0 0 1 7 7l-4 4a5 5 0 0 1-7 0z"/><path d="M14 10l7 7"/><path d="M3 6h8"/><path d="M7 2v8"/>`,
+  lab: `<path d="M10 2v6l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V2"/><path d="M8 2h8"/><path d="M7 16h10"/>`,
+  discharge: `<path d="M7 3h10l3 3v15H7z"/><path d="M17 3v4h4"/><path d="M10 14h7"/><path d="M14 10v8"/><path d="M11 15l3 3 3-3"/>`,
+  insurance: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-5"/>`,
+  billing: `<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/>`,
+  "clinic-patient-hub": `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v6h6"/><path d="M9 14h6"/><path d="M12 11v6"/>`,
+  "clinic-consultation": `<path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/>`,
+  "clinic-prescriptions": `<path d="M7 3h10v18H7z"/><path d="M10 8h4"/><path d="M12 6v4"/><path d="M10 14h4"/><path d="M10 17h4"/>`,
+  "clinic-inventory": `<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>`,
+  "clinic-billing": `<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/>`,
+  "clinic-whatsapp": `<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5z"/><path d="M9 9c.5 2 2 3.5 4 4l1.5-1.5"/>`,
 };
 
+function iconFor(moduleId) {
+  return `
+    <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true">
+      ${icons[moduleId] || icons.record}
+    </svg>
+  `;
+}
+
 const POSITION_STORAGE_KEY = "his-map-explorer.positions.v5";
+const HIGH_CONTRAST_FLOW_TONES = new Set(["emergency", "pharmacy", "lab"]);
 let activeProduct = "hospital";
 let activeMap = productMaps[activeProduct];
 let modules = activeMap.modules;
@@ -554,9 +590,32 @@ const mapContent = document.getElementById("mapContent");
 const connectionsSvg = document.querySelector(".connections");
 const mapTitle = document.getElementById("mapTitle");
 const tabButtons = document.querySelectorAll("[data-product]");
+const relationPanel = document.getElementById("relationPanel");
+const relationTitle = document.getElementById("relationTitle");
+const relationList = document.getElementById("relationList");
+const relationCloseBtn = document.getElementById("relationCloseBtn");
 let zoom = 1;
 let canvasWidth = 1600;
 let canvasHeight = 2050;
+const toneColorCache = new Map();
+
+function toneColor(tone) {
+  if (toneColorCache.has(tone)) {
+    return toneColorCache.get(tone);
+  }
+
+  const probe = document.createElement("span");
+  probe.className = `tone-${tone}`;
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  document.body.appendChild(probe);
+  const color =
+    getComputedStyle(probe).getPropertyValue("--tone-border").trim() ||
+    getComputedStyle(probe).borderTopColor;
+  probe.remove();
+  toneColorCache.set(tone, color);
+  return color;
+}
 
 function center(module) {
   const rendered = renderedModules.get(module.id);
@@ -611,8 +670,7 @@ function renderNodes() {
     }
 
     node.innerHTML = `
-      <span class="icon">${module.icon}</span>
-      <h3>${module.title}</h3>
+      <h3 class="node-title">${iconFor(module.id)}<span>${module.title}</span></h3>
       <p class="module-description">${module.description}</p>
     `;
 
@@ -686,6 +744,47 @@ function renderNodes() {
   });
 }
 
+function renderRelationPanel() {
+  if (!selected) {
+    relationPanel.hidden = true;
+    relationTitle.textContent = "";
+    relationList.innerHTML = "";
+    return;
+  }
+
+  const selectedModule = moduleById.get(selected);
+  const { incoming, outgoing } = relationSets(selected);
+  const selectedConnections = [...outgoing, ...incoming];
+
+  relationPanel.hidden = false;
+  relationTitle.textContent = selectedModule.title;
+  relationList.innerHTML = "";
+
+  selectedConnections.forEach((connection) => {
+    const isOutgoing = connection.from === selected;
+    const otherModule = moduleById.get(
+      isOutgoing ? connection.to : connection.from,
+    );
+    const selectedTitle = selectedModule.title;
+    const otherTitle = otherModule.title;
+    const directionLabel = isOutgoing
+      ? `${selectedTitle} sends to ${otherTitle}`
+      : `${otherTitle} sends to ${selectedTitle}`;
+    const directionArrow = isOutgoing ? "↑" : "↓";
+    const relation = document.createElement("article");
+    relation.className = `relation-item tone-${otherModule.tone}`;
+    relation.innerHTML = `
+      <h3 class="relation-item-title">
+        ${iconFor(otherModule.id)}
+        <span>${otherModule.title}</span>
+        <span class="relation-arrow" aria-label="${directionLabel}" title="${directionLabel}">${directionArrow}</span>
+      </h3>
+      <p>${connection.explanation}</p>
+    `;
+    relationList.appendChild(relation);
+  });
+}
+
 function renderConnections() {
   connectionLayer.innerHTML = "";
   const focusId = selected;
@@ -693,7 +792,8 @@ function renderConnections() {
   connections.forEach((connection, index) => {
     const active = !focusId || connection.from === focusId || connection.to === focusId;
     const path = pathFor(connection);
-    const color = colors[connection.kind];
+    const fromModule = moduleById.get(connection.from);
+    const color = toneColor(fromModule.tone);
     const pathId = `flow-${index}`;
 
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -707,6 +807,9 @@ function renderConnections() {
     line.setAttribute("color", color);
     line.setAttribute("id", pathId);
     line.classList.add("flow-path");
+    if (!HIGH_CONTRAST_FLOW_TONES.has(fromModule.tone)) {
+      line.classList.add("softer");
+    }
     if (!active && focusId) line.classList.add("dimmed");
     if (active) line.classList.add("active");
     group.appendChild(line);
@@ -760,6 +863,7 @@ function render() {
   renderNodes();
   updateCanvasBounds();
   renderConnections();
+  renderRelationPanel();
 }
 
 function setActiveProduct(product) {
@@ -844,10 +948,15 @@ mapStage.addEventListener(
 );
 
 mapStage.addEventListener("click", (event) => {
-  if (event.target.closest(".node")) {
+  if (event.target.closest(".node") || event.target.closest(".relation-panel")) {
     return;
   }
 
+  selected = null;
+  render();
+});
+
+relationCloseBtn.addEventListener("click", () => {
   selected = null;
   render();
 });
