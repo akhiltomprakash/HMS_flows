@@ -18,8 +18,8 @@
             ◐
           </button>
           <nav class="tabs" aria-label="Product type">
-            <button class="tab active" type="button">Hospital</button>
-            <button class="tab" type="button" disabled>Clinic later</button>
+            <button class="tab active" type="button" data-product="hospital">Hospital</button>
+            <button class="tab" type="button" data-product="clinic">Clinic</button>
           </nav>
         </div>
       </header>
@@ -28,7 +28,7 @@
         <div class="map-card">
           <div class="map-toolbar">
             <div>
-              <strong>Hospital module map</strong>
+              <strong id="mapTitle">Hospital module map</strong>
               <span>Click a module to focus its direct flows.</span>
             </div>
             <div class="map-actions">

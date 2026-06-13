@@ -1,4 +1,4 @@
-const modules = [
+const hospitalModules = [
   {
     id: "registration",
     title: "Registration + MRN",
@@ -315,7 +315,7 @@ const modules = [
   },
 ];
 
-const connections = [
+const hospitalConnections = [
   ["registration", "opd", "check-in + token", "identity", "critical"],
   ["registration", "ipd", "patient identity", "identity", "critical"],
   ["registration", "emergency", "quick/complete registration", "identity", "degraded"],
@@ -353,6 +353,139 @@ const connections = [
   ["billing", "insurance", "claim ledger", "finance", "critical"],
 ].map(([from, to, label, kind, severity]) => ({ from, to, label, kind, severity }));
 
+const clinicModules = [
+  {
+    id: "clinic-patient-hub",
+    title: "Patient Registration + Hub",
+    icon: "ID",
+    summary: "Patient identity, lookup, history, and quick retrieval for clinic visits.",
+    description:
+      "Creates or finds the patient profile, keeps demographics and identifiers together, and acts as the clinic's lightweight patient record for prior visits, prescriptions, bills, attachments, and quick summaries.",
+    details: [],
+    impact:
+      "Without it, clinic visits, prescriptions, billing, and remote WhatsApp lookup cannot reliably point back to the same patient.",
+    x: 55,
+    y: 110,
+    w: 360,
+    h: 185,
+    tone: "blue",
+    module: true,
+  },
+  {
+    id: "clinic-consultation",
+    title: "Visit / Doctor Consultation",
+    icon: "DR",
+    summary: "Doctor workspace for each clinic visit.",
+    description:
+      "Opens the active visit from the patient hub so the doctor can record diagnosis, clinical notes, vitals, observations, follow-up plans, reports, attachments, and context from previous visits.",
+    details: [],
+    impact:
+      "Without it, the clinic can find patients but the actual clinical decision, prescription, and charge flow moves outside the system.",
+    x: 545,
+    y: 90,
+    w: 380,
+    h: 210,
+    tone: "green",
+    module: true,
+  },
+  {
+    id: "clinic-prescriptions",
+    title: "Prescriptions",
+    icon: "RX",
+    summary: "Medicines prescribed during a consultation.",
+    description:
+      "Turns the doctor's treatment plan into a shareable prescription, supports repeat or copied medicine context, and links prescribed medicines to inventory and billing when the clinic dispenses them.",
+    details: [],
+    impact:
+      "Without it, doctors can document visits but medicine advice, repeat prescriptions, stock deduction, and sharing become manual.",
+    x: 1120,
+    y: 95,
+    w: 360,
+    h: 200,
+    tone: "red",
+    module: true,
+  },
+  {
+    id: "clinic-inventory",
+    title: "Medicine Inventory",
+    icon: "ST",
+    summary: "Clinic medicine catalog, stock, expiry, and alerts.",
+    description:
+      "Maintains the medicine catalog and stock position, tracks stock in and out, warns on low stock or expiry, and deducts inventory when prescriptions are fulfilled from clinic stock.",
+    details: [],
+    impact:
+      "Without it, prescriptions can still be written but stock, expiry, and medicine availability must be reconciled manually.",
+    x: 1640,
+    y: 80,
+    w: 360,
+    h: 205,
+    tone: "yellow",
+    module: true,
+  },
+  {
+    id: "clinic-billing",
+    title: "Billing + Payments",
+    icon: "₹",
+    summary: "Consultation charges, medicine charges, receipts, and daily collections.",
+    description:
+      "Builds a bill from the visit, consultation fees, and dispensed medicines, then tracks payment status, receipts, invoice export, and a simple daily collection view for the clinic.",
+    details: [],
+    impact:
+      "Without it, the clinical workflow can run but revenue capture, payment status, and daily collection reporting break.",
+    x: 1090,
+    y: 520,
+    w: 390,
+    h: 210,
+    tone: "orange",
+    module: true,
+  },
+  {
+    id: "clinic-whatsapp",
+    title: "WhatsApp Remote Lookup",
+    icon: "WA",
+    summary: "Remote doctor access to patient data through WhatsApp lookup.",
+    description:
+      "Sends the relevant clinic database view to a doctor's WhatsApp when remote lookup is needed, including identity, prior visits, prescriptions, billing context, reports, and recent clinical history.",
+    details: [],
+    impact:
+      "Without it, doctors can still use the clinic system on-site but remote patient lookup depends on manual staff coordination.",
+    x: 55,
+    y: 365,
+    w: 360,
+    h: 190,
+    tone: "purple",
+    module: true,
+  },
+];
+
+const clinicConnections = [
+  ["clinic-patient-hub", "clinic-consultation", "open visit", "identity", "critical"],
+  ["clinic-consultation", "clinic-patient-hub", "visit history", "record", "critical"],
+  ["clinic-consultation", "clinic-prescriptions", "treatment plan", "clinical", "critical"],
+  ["clinic-prescriptions", "clinic-inventory", "stock deduction", "orders", "degraded"],
+  ["clinic-prescriptions", "clinic-billing", "medicine charges", "finance", "degraded"],
+  ["clinic-consultation", "clinic-billing", "consultation charge", "finance", "critical"],
+  ["clinic-billing", "clinic-patient-hub", "payment history", "record", "degraded"],
+  ["clinic-patient-hub", "clinic-whatsapp", "patient database view", "record", "critical"],
+].map(([from, to, label, kind, severity]) => ({ from, to, label, kind, severity }));
+
+const productMaps = {
+  hospital: {
+    title: "Hospital module map",
+    modules: hospitalModules,
+    connections: hospitalConnections,
+    minWidth: 1600,
+    minHeight: 2050,
+  },
+  clinic: {
+    title: "Clinic module map",
+    modules: clinicModules,
+    connections: clinicConnections,
+    minWidth: 1600,
+    minHeight: 980,
+  },
+};
+
 const colors = {
   identity: "#7abfff",
   clinical: "#a78bfa",
@@ -362,13 +495,19 @@ const colors = {
   governance: "#62d4c9",
 };
 
-const POSITION_STORAGE_KEY = "his-map-explorer.positions.v4";
+const POSITION_STORAGE_KEY = "his-map-explorer.positions.v5";
+let activeProduct = "hospital";
+let activeMap = productMaps[activeProduct];
+let modules = activeMap.modules;
+let connections = activeMap.connections;
+let moduleById = new Map(modules.map((module) => [module.id, module]));
 
 function loadSavedPositions() {
   try {
     const saved = JSON.parse(localStorage.getItem(POSITION_STORAGE_KEY) || "{}");
+    const productPositions = saved[activeProduct] || {};
     modules.forEach((module) => {
-      const position = saved[module.id];
+      const position = productPositions[module.id];
       if (
         position &&
         Number.isFinite(position.x) &&
@@ -384,16 +523,23 @@ function loadSavedPositions() {
 }
 
 function savePositions() {
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(POSITION_STORAGE_KEY) || "{}");
+  } catch {
+    saved = {};
+  }
+
   const positions = {};
   modules.forEach((module) => {
     positions[module.id] = { x: module.x, y: module.y };
   });
-  localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(positions));
+  saved[activeProduct] = positions;
+  localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(saved));
 }
 
 loadSavedPositions();
 
-const moduleById = new Map(modules.map((module) => [module.id, module]));
 let selected = null;
 const renderedModules = new Map();
 let dragState = null;
@@ -406,6 +552,8 @@ const mapStage = document.getElementById("mapStage");
 const mapContent = document.getElementById("mapContent");
 const themeBtn = document.getElementById("themeBtn");
 const connectionsSvg = document.querySelector(".connections");
+const mapTitle = document.getElementById("mapTitle");
+const tabButtons = document.querySelectorAll("[data-product]");
 let zoom = 1;
 let canvasWidth = 1600;
 let canvasHeight = 2050;
@@ -584,8 +732,8 @@ function renderConnections() {
 }
 
 function updateCanvasBounds() {
-  let maxRight = 1600;
-  let maxBottom = 2050;
+  let maxRight = activeMap.minWidth;
+  let maxBottom = activeMap.minHeight;
   const padding = 360;
 
   modules.forEach((module) => {
@@ -608,10 +756,42 @@ function updateCanvasBounds() {
 }
 
 function render() {
+  mapTitle.textContent = activeMap.title;
   renderNodes();
   updateCanvasBounds();
   renderConnections();
 }
+
+function setActiveProduct(product) {
+  if (!productMaps[product] || product === activeProduct) return;
+
+  activeProduct = product;
+  activeMap = productMaps[activeProduct];
+  modules = activeMap.modules;
+  connections = activeMap.connections;
+  moduleById = new Map(modules.map((module) => [module.id, module]));
+  selected = null;
+  zoom = 1;
+  mapContent.style.zoom = zoom;
+  mapStage.scrollTo({ left: 0, top: 0 });
+  loadSavedPositions();
+
+  tabButtons.forEach((button) => {
+    const isActive = button.dataset.product === activeProduct;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+
+  render();
+}
+
+tabButtons.forEach((button) => {
+  button.setAttribute(
+    "aria-current",
+    button.dataset.product === activeProduct ? "page" : "false",
+  );
+  button.addEventListener("click", () => setActiveProduct(button.dataset.product));
+});
 
 fullscreenBtn.addEventListener("click", async () => {
   if (!document.fullscreenElement) {

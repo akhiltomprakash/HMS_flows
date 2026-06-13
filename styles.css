@@ -130,6 +130,7 @@ body.dark .tab.active {
   padding: 10px 16px;
   background: transparent;
   color: var(--muted);
+  cursor: pointer;
   font-weight: 800;
 }
 
