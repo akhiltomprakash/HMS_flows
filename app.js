@@ -323,6 +323,7 @@ const hospitalConnections = [
   ["emergency", "registration", "complete registration", "identity", "degraded"],
   ["emergency", "ipd", "convert", "clinical", "critical"],
   ["emergency", "clinical", "stabilization notes", "clinical", "critical"],
+  ["emergency", "record", "emergency notes", "record", "critical"],
   ["opd", "ipd", "admit", "clinical", "critical"],
   ["opd", "clinical", "consult", "clinical", "critical"],
   ["ipd", "clinical", "rounds", "clinical", "critical"],
