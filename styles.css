@@ -371,7 +371,7 @@ body.dark .map-stage {
   line-height: 1.45;
 }
 
-.node .combined-description {
+.node .module-description {
   max-width: 44ch;
 }
 

@@ -4,6 +4,8 @@ const modules = [
     title: "Registration + MRN",
     icon: "ID",
     summary: "Front desk intake, patient identity, and OPD token creation.",
+    description:
+      "Creates or finds the patient identity and token/MRN so OPD, emergency, IPD, billing, and records all refer to the same patient.",
     details: [
       "Walk-in / appointment check-in",
       "Existing patient lookup",
@@ -26,6 +28,8 @@ const modules = [
     title: "Emergency / Casualty",
     icon: "ER",
     summary: "Fast triage and stabilization before OPD or IPD conversion.",
+    description:
+      "Captures urgent triage and stabilization, then completes registration or routes the patient to the doctor console or admission.",
     details: [
       "Quick registration",
       "Triage priority",
@@ -47,6 +51,8 @@ const modules = [
     title: "Beds / Wards / OT",
     icon: "BD",
     summary: "Bed board, ward transfers, OT scheduling, and occupancy.",
+    description:
+      "Manages bed, ward, and OT availability, then feeds bed movement and ward status into IPD and nursing workflows.",
     details: [
       "Bed board",
       "Ward transfer",
@@ -69,6 +75,8 @@ const modules = [
     title: "Nursing + MAR",
     icon: "NR",
     summary: "Vitals, medication administration, handover, and escalations.",
+    description:
+      "Records vitals, medication administration, and handovers during IPD, then passes care notes into the patient record and discharge.",
     details: [
       "Vitals charting",
       "Medication administration",
@@ -91,6 +99,8 @@ const modules = [
     title: "IPD / Admission",
     icon: "IP",
     summary: "Admitted patient workflow from admission request to discharge planning.",
+    description:
+      "Coordinates admitted care across beds, nursing, doctor rounds, and procedures, then closes the stay into discharge and patient history.",
     details: [
       "Admission request",
       "Bed allocation",
@@ -114,6 +124,8 @@ const modules = [
     title: "OPD + Queue",
     icon: "OP",
     summary: "Queue, doctor assignment, consultation, and referrals.",
+    description:
+      "Uses the registration token to manage outpatient queues, doctor assignment, consultation, referrals, admission, and OPD history.",
     details: [
       "Queue view",
       "Doctor assignment",
@@ -136,6 +148,8 @@ const modules = [
     icon: "LR",
     summary:
       "Cross-department patient memory across OPD, IPD, orders, results, bills, and discharge.",
+    description:
+      "Collects identity, OPD/IPD history, doctor notes, vitals, results, medicines, bills, and discharge into one searchable patient view.",
     details: [
       "Cross-department timeline",
       "Orders, results, meds, bills",
@@ -157,6 +171,8 @@ const modules = [
     title: "Doctor Console",
     icon: "DR",
     summary: "Doctor workspace for notes, diagnoses, orders, prescriptions, and procedures.",
+    description:
+      "Lets doctors work on OPD, IPD, and emergency cases, then send notes, prescriptions, test orders, and discharge approvals onward.",
     details: [
       "Doctor notes",
       "Diagnosis + orders",
@@ -179,6 +195,8 @@ const modules = [
     title: "Pharmacy",
     icon: "RX",
     summary: "Prescription fulfillment, dispensing, returns, and stock movement.",
+    description:
+      "Receives prescriptions from the doctor console, dispenses medicines, updates stock, and sends medicine charges or discharge meds onward.",
     details: [
       "Prescription fulfillment",
       "Dispense / return",
@@ -201,6 +219,8 @@ const modules = [
     title: "Lab / Diagnostics",
     icon: "LB",
     summary: "Test ordering, sample collection, result upload, approval, and return to record.",
+    description:
+      "Receives test orders from the doctor console, manages sample and report workflow, then sends results to records, billing, and discharge.",
     details: [
       "Test ordering",
       "Sample collection",
@@ -224,6 +244,8 @@ const modules = [
     icon: "DS",
     summary:
       "Closure artifact for treatment, medicines, reports, billing status, and follow-up.",
+    description:
+      "Pulls IPD closure, doctor approval, nursing notes, lab reports, pharmacy medicines, billing status, and insurance documents into discharge.",
     details: [
       "Discharge diagnosis",
       "Treatment given",
@@ -247,6 +269,8 @@ const modules = [
     title: "Insurance / TPA",
     icon: "TP",
     summary: "Policy capture, authorization, claim documents, approval, and settlement.",
+    description:
+      "Uses discharge and billing documents to manage insurance approval, claim submission, and final settlement with the TPA.",
     details: [
       "Policy capture",
       "Pre-authorization",
@@ -270,6 +294,8 @@ const modules = [
     icon: "₹",
     summary:
       "Single financial ledger across OPD, IPD, lab, pharmacy, packages, refunds, and settlement.",
+    description:
+      "Collects OPD, IPD, lab, and pharmacy charges, then returns settlement status for discharge and insurance claims.",
     details: [
       "OPD/IPD/lab/pharmacy billing",
       "Deposits + advances",
@@ -436,12 +462,10 @@ function renderNodes() {
       node.classList.add("dimmed");
     }
 
-    const combinedDescription = [module.summary, ...module.details].join(" ");
-
     node.innerHTML = `
       <span class="icon">${module.icon}</span>
       <h3>${module.title}</h3>
-      <p class="combined-description">${combinedDescription}</p>
+      <p class="module-description">${module.description}</p>
     `;
 
     node.addEventListener("pointerdown", (event) => {
